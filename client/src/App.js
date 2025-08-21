@@ -5,6 +5,7 @@ import Navbar from './components/layout/Navbar';
 
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import TradespersonRegister from './components/auth/TradespersonRegister';
 import Dashboard from './components/dashboard/Dashboard';
 import JobPost from './components/jobs/JobPost';
 import JobDetail from './components/jobs/JobDetail';
@@ -38,6 +39,7 @@ function App() {
           <Route path="/" element={<Discovery />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/register/tradesperson" element={<TradespersonRegister />} />
           <Route 
             path="/dashboard" 
             element={

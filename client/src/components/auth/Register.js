@@ -334,7 +334,23 @@ const Register = () => {
               </button>
             </div>
 
-            <div className="text-center">
+            <div className="text-center space-y-4">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">or</span>
+                </div>
+              </div>
+
+              <Link
+                to="/register/tradesperson"
+                className="w-full flex justify-center py-3 px-4 border-2 border-blue-600 text-sm font-medium rounded-lg text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                Sign up as a Glass Installer
+              </Link>
+
               <p className="text-sm text-gray-600">
                 Already have an account?{' '}
                 <Link

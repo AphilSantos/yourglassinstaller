@@ -20,9 +20,12 @@ async function setupDatabase() {
     await pool.query(schema);
     
     console.log('Database setup completed successfully!');
-    console.log('Tables created: users, categories, jobs, reviews');
+    console.log('Tables created: users, tradespeople, tradesperson_portfolio, tradesperson_reviews,');
+    console.log('                tradesperson_availability, tradesperson_quotes, categories, jobs,');
+    console.log('                job_applications, reviews');
     console.log('Default categories inserted');
     console.log('Indexes created for performance');
+    console.log('Mock verification system enabled for tradespeople');
     
   } catch (error) {
     console.error('Error setting up database:', error.message);
