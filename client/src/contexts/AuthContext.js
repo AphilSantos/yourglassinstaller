@@ -16,6 +16,24 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('token'));
 
+  // Normalize API user shape (snake_case) to client shape (camelCase)
+  const mapApiUserToClient = (apiUser) => {
+    if (!apiUser) return null;
+    return {
+      id: apiUser.id,
+      email: apiUser.email,
+      firstName: apiUser.first_name ?? apiUser.firstName,
+      lastName: apiUser.last_name ?? apiUser.lastName,
+      phone: apiUser.phone,
+      address: apiUser.address,
+      city: apiUser.city,
+      postcode: apiUser.postcode,
+      profileImage: apiUser.profile_image ?? apiUser.profileImage,
+      created_at: apiUser.created_at ?? apiUser.createdAt,
+      tradesperson_id: apiUser.tradesperson_id, // keep snake_case as ID key used elsewhere
+    };
+  };
+
   // Set auth token for axios requests
   useEffect(() => {
     if (token) {
@@ -29,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   const loadUser = async () => {
     try {
       const res = await axios.get('/api/auth/user');
-      setUser(res.data);
+      setUser(mapApiUserToClient(res.data));
     } catch (err) {
       localStorage.removeItem('token');
       delete axios.defaults.headers.common['x-auth-token'];
@@ -86,7 +104,7 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (profileData) => {
     try {
       const res = await axios.put('/api/users/profile', profileData);
-      setUser(res.data);
+      setUser(mapApiUserToClient(res.data));
       return { success: true };
     } catch (err) {
       return { 
@@ -103,6 +121,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateProfile,
+    loadUser,
     isAuthenticated: !!user
   };
 

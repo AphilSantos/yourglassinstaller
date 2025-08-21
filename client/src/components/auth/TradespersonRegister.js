@@ -1,9 +1,10 @@
-import React, { useState, useContext } from 'react';
-import { AuthContext } from '../../contexts/AuthContext';
+import React, { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const TradespersonRegister = () => {
-  const { register } = useContext(AuthContext);
+  const { register, loadUser } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -116,8 +117,11 @@ const TradespersonRegister = () => {
         throw new Error(errorData.msg || 'Tradesperson registration failed');
       }
 
-      // Update auth context
-      await register({ email: formData.email, password: formData.password });
+      // Set the auth token for future requests
+      axios.defaults.headers.common['x-auth-token'] = token;
+      
+      // Refresh user data to get tradesperson_id
+      await loadUser();
       
       // Redirect to dashboard
       navigate('/dashboard');

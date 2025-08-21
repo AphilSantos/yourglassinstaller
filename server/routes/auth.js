@@ -133,7 +133,7 @@ router.post('/login', [
 // @access  Private
 router.get('/user', auth, async (req, res) => {
   try {
-    // Get user from token (middleware will be added later)
+    // Get user from token
     const user = await req.db.query(
       'SELECT id, email, first_name, last_name, phone, address, city, postcode, profile_image, created_at FROM users WHERE id = $1',
       [req.user.id]
@@ -143,7 +143,20 @@ router.get('/user', auth, async (req, res) => {
       return res.status(404).json({ msg: 'User not found' });
     }
 
-    res.json(user.rows[0]);
+    // Check if user has a tradesperson profile
+    const tradesperson = await req.db.query(
+      'SELECT id FROM tradespeople WHERE user_id = $1',
+      [req.user.id]
+    );
+
+    const userData = user.rows[0];
+    
+    // Add tradesperson_id if user has a tradesperson profile
+    if (tradesperson.rows.length > 0) {
+      userData.tradesperson_id = tradesperson.rows[0].id;
+    }
+
+    res.json(userData);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');

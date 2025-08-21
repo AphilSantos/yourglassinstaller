@@ -52,8 +52,39 @@ router.post('/register', [
   }
 });
 
+// @route   GET /api/tradespeople/:id/applications
+// @desc    Get applications by tradesperson
+// @access  Private
+router.get('/:id/applications', auth, async (req, res) => {
+  try {
+    const tradesperson = new Tradesperson(req.db);
+    const profile = await tradesperson.findByUserId(req.user.id);
+    
+    if (!profile || profile.id !== parseInt(req.params.id)) {
+      return res.status(403).json({ msg: 'Not authorized' });
+    }
+
+    const applicationsQuery = `
+      SELECT a.*, j.title as job_title, j.description as job_description,
+             j.location, j.budget_min, j.budget_max, j.timeline,
+             u.first_name, u.last_name, u.phone, u.email
+      FROM job_applications a
+      JOIN jobs j ON a.job_id = j.id
+      JOIN users u ON j.user_id = u.id
+      WHERE a.tradesperson_id = $1
+      ORDER BY a.created_at DESC
+    `;
+
+    const result = await req.db.query(applicationsQuery, [req.params.id]);
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
 // @route   GET /api/tradespeople/profile
-// @desc    Get current tradesperson profile
+// @desc    Get tradesperson profile by user ID
 // @access  Private
 router.get('/profile', auth, async (req, res) => {
   try {

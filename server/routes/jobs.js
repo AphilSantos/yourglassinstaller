@@ -55,7 +55,7 @@ router.get('/', async (req, res) => {
     const offset = (page - 1) * limit;
 
     let query = `
-      SELECT j.*, u.first_name, u.last_name, c.name as category_name
+      SELECT j.*, u.first_name, u.last_name, u.phone, u.email, c.name as category_name
       FROM jobs j
       JOIN users u ON j.user_id = u.id
       JOIN categories c ON j.category_id = c.id
@@ -93,7 +93,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const job = await req.db.query(
-      `SELECT j.*, u.first_name, u.last_name, c.name as category_name
+      `SELECT j.*, u.first_name, u.last_name, u.phone, u.email, c.name as category_name
        FROM jobs j
        JOIN users u ON j.user_id = u.id
        JOIN categories c ON j.category_id = c.id

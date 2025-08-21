@@ -22,6 +22,13 @@ const JobPost = () => {
   });
 
   useEffect(() => {
+    // Redirect tradespeople away from this page
+    if (user?.tradesperson_id) {
+      toast.error('Only homeowners can post jobs.');
+      navigate('/dashboard');
+      return;
+    }
+
     fetchCategories();
     // Pre-fill location with user's city
     if (user?.city) {

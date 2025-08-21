@@ -18,9 +18,10 @@ const Navbar = () => {
     { name: 'Browse Jobs', path: '/', icon: Search },
   ];
 
+  const isTradesperson = !!user?.tradesperson_id;
   const authenticatedItems = [
     { name: 'Dashboard', path: '/dashboard', icon: Briefcase },
-    { name: 'Post Job', path: '/post-job', icon: Plus },
+    ...(!isTradesperson ? [{ name: 'Post Job', path: '/post-job', icon: Plus }] : []),
     { name: 'Profile', path: '/profile', icon: User },
   ];
 
@@ -96,6 +97,12 @@ const Navbar = () => {
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
                   Get Started
+                </Link>
+                <Link
+                  to="/register/tradesperson"
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200"
+                >
+                  Join as Tradesperson
                 </Link>
               </div>
             )}
@@ -174,6 +181,13 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   Get Started
+                </Link>
+                <Link
+                  to="/register/tradesperson"
+                  className="block w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 text-center"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Join as Tradesperson
                 </Link>
               </div>
             )}

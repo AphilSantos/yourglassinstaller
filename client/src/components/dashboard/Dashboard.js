@@ -4,11 +4,13 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Plus, Eye, Edit, Trash2, Clock, DollarSign, MapPin, CheckCircle, XCircle } from 'lucide-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import TradespersonDashboard from './TradespersonDashboard';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isTradesperson, setIsTradesperson] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     open: 0,
@@ -17,8 +19,34 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    fetchUserJobs();
-  }, []);
+    if (user && user.id) {
+      checkUserType();
+    }
+  }, [user]);
+
+  const checkUserType = async () => {
+    try {
+      console.log('Checking user type for user:', user);
+      
+      // Check if user object has tradesperson_id (direct check)
+      if (user && user.tradesperson_id) {
+        console.log('User has tradesperson_id, setting isTradesperson to true');
+        setIsTradesperson(true);
+        setLoading(false);
+        return;
+      }
+      
+      // If no tradesperson_id, user is a homeowner
+      console.log('User is a homeowner, fetching jobs');
+      setIsTradesperson(false);
+      fetchUserJobs();
+    } catch (error) {
+      console.log('Error checking user type:', error);
+      // Default to homeowner dashboard
+      setIsTradesperson(false);
+      fetchUserJobs();
+    }
+  };
 
   const fetchUserJobs = async () => {
     try {
@@ -94,6 +122,11 @@ const Dashboard = () => {
     };
     return iconMap[categoryName] || '✨';
   };
+
+  // If user is a tradesperson, show tradesperson dashboard
+  if (isTradesperson) {
+    return <TradespersonDashboard />;
+  }
 
   if (loading) {
     return (

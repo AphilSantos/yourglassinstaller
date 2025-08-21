@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { MapPin, DollarSign, Clock, User, Calendar, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
+import MessageModal from '../messaging/MessageModal';
+import QuoteModal from '../quotes/QuoteModal';
 
 const JobDetail = () => {
   const { id } = useParams();
@@ -10,9 +12,13 @@ const JobDetail = () => {
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [messageModalOpen, setMessageModalOpen] = useState(false);
+  const [quoteModalOpen, setQuoteModalOpen] = useState(false);
+  const [isTradesperson, setIsTradesperson] = useState(false);
 
   useEffect(() => {
     fetchJobDetails();
+    checkUserType();
   }, [id]);
 
   const fetchJobDetails = async () => {
@@ -65,6 +71,52 @@ const JobDetail = () => {
         {config.text}
       </span>
     );
+  };
+
+  const openMessageModal = () => {
+    setMessageModalOpen(true);
+  };
+
+  const closeMessageModal = () => {
+    setMessageModalOpen(false);
+  };
+
+  const openQuoteModal = () => {
+    setQuoteModalOpen(true);
+  };
+
+  const closeQuoteModal = () => {
+    setQuoteModalOpen(false);
+  };
+
+  const checkUserType = async () => {
+    if (!user) return;
+    
+    try {
+      console.log('Checking user type for user:', user);
+      
+      // Check if user has tradesperson_id directly
+      if (user.tradesperson_id) {
+        console.log('User has tradesperson_id:', user.tradesperson_id);
+        setIsTradesperson(true);
+        return;
+      }
+      
+      // Check if user has a tradesperson profile
+      const response = await axios.get('/api/tradespeople/profile');
+      console.log('Tradesperson profile response:', response.data);
+      
+      if (response.data && response.data.id) {
+        console.log('User is a tradesperson, profile ID:', response.data.id);
+        setIsTradesperson(true);
+        // Update the user object with tradesperson_id for the modals
+        user.tradesperson_id = response.data.id;
+      }
+    } catch (error) {
+      console.log('Error checking tradesperson profile:', error);
+      // User is not a tradesperson
+      setIsTradesperson(false);
+    }
   };
 
   if (loading) {
@@ -204,35 +256,61 @@ const JobDetail = () => {
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="glass-effect rounded-xl p-8 shadow-xl border border-white/20">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Interested in this project?</h2>
-            <p className="text-gray-600 mb-6">
-              {job.status === 'open' 
-                ? 'This project is currently open for quotes. Contact the homeowner to discuss your proposal.'
-                : 'This project is currently not accepting new quotes.'
-              }
-            </p>
-            
-            {job.status === 'open' && (
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                  Contact Homeowner
-                </button>
-                <button className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200">
-                  Send Quote
-                </button>
-              </div>
-            )}
+        {/* Action Buttons - Only show for tradespeople */}
+        {isTradesperson && (
+          <div className="glass-effect rounded-xl p-8 shadow-xl border border-white/20">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Interested in this project?</h2>
+              <p className="text-gray-600 mb-6">
+                {job.status === 'open' 
+                  ? 'This project is currently open for quotes. Contact the homeowner to discuss your proposal.'
+                  : 'This project is currently not accepting new quotes.'
+                }
+              </p>
+              
+              {job.status === 'open' && (
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button 
+                    onClick={openMessageModal}
+                    className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  >
+                    Contact Homeowner
+                  </button>
+                  <button 
+                    onClick={openQuoteModal}
+                    className="px-8 py-3 border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all duration-200"
+                  >
+                    Send Quote
+                  </button>
+                </div>
+              )}
 
-            {job.status !== 'open' && (
-              <div className="text-center py-4">
-                <p className="text-gray-500">This project is no longer accepting quotes.</p>
-              </div>
-            )}
+              {job.status !== 'open' && (
+                <div className="text-center py-4">
+                  <p className="text-gray-500">This project is no longer accepting quotes.</p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Show message for non-tradespeople */}
+        {!isTradesperson && user && (
+          <div className="glass-effect rounded-xl p-8 shadow-xl border border-white/20">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">Interested in this project?</h2>
+              <p className="text-gray-600 mb-6">
+                To contact homeowners and send quotes, you need to register as a tradesperson.
+              </p>
+              <Link
+                to="/register/tradesperson"
+                className="inline-flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                Register as Tradesperson
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Additional Information */}
         <div className="mt-8 text-center">
@@ -244,6 +322,30 @@ const JobDetail = () => {
           </p>
         </div>
       </div>
+
+      {/* Message Modal */}
+      {job && user?.tradesperson_id && (
+        <MessageModal
+          isOpen={messageModalOpen}
+          onClose={closeMessageModal}
+          jobId={job.id}
+          tradespersonId={user.tradesperson_id}
+          homeownerId={job.user_id}
+          currentUserId={user.id}
+          userType="tradesperson"
+        />
+      )}
+
+      {/* Quote Modal */}
+      {job && user?.tradesperson_id && (
+        <QuoteModal
+          isOpen={quoteModalOpen}
+          onClose={closeQuoteModal}
+          jobId={job.id}
+          tradespersonId={user.tradesperson_id}
+          jobDetails={job}
+        />
+      )}
     </div>
   );
 };
